@@ -1,5 +1,5 @@
 
-import { Redis } from '@upstash/redis';
+import Redis from 'ioredis';
 
 export interface IQueue {
     addToQueue(event: any): Promise<void>;
@@ -16,7 +16,6 @@ export class RedisQueue implements IQueue {
 
     async addToQueue(event: any) {
         await this.redis.rpush(this.queueKey, JSON.stringify(event));
-        console.log(`📥 [REDIS QUEUE] Event added: ${event.title}`);
     }
 
     async popFromQueue() {
@@ -33,7 +32,6 @@ export class InMemoryQueue implements IQueue {
 
     async addToQueue(event: any) {
         InMemoryQueue.queue.push(event);
-        console.log(`📥 [MEMORY QUEUE] Event added: ${event.title}`);
     }
 
     async popFromQueue() {

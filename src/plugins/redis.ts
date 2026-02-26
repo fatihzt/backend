@@ -1,23 +1,27 @@
 import { FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
-import { Redis } from '@upstash/redis';
+import Redis from 'ioredis';
 
 export default fp(async (fastify: FastifyInstance) => {
-    if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-        fastify.log.warn('Upstash credentials not found, Redis plugin skipped.');
+    const redisUrl = process.env.REDIS_URL;
+    if (!redisUrl) {
+        fastify.log.warn('REDIS_URL not found, Redis plugin skipped. Using memory cache.');
         return;
     }
 
-    const redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    });
+    const redis = new Redis(redisUrl);
 
-    fastify.decorate('redis', redis);
+    try {
+        await redis.ping();
+        fastify.decorate('redis', redis);
+        fastify.log.info('Redis connected successfully');
+    } catch (err) {
+        fastify.log.warn('Redis connection failed, falling back to memory cache.');
+    }
 });
 
 declare module 'fastify' {
     interface FastifyInstance {
-        redis: Redis;
+        redis?: Redis;
     }
 }

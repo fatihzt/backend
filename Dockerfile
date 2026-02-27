@@ -16,7 +16,9 @@ WORKDIR /app
 
 COPY package*.json ./
 
+ENV NODE_ENV=development
 RUN npm ci
+ENV NODE_ENV=production
 
 COPY . .
 

@@ -4,8 +4,7 @@ import { Pool } from 'pg';
 
 export default fp(async (fastify: FastifyInstance) => {
     const pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false }
+        connectionString: process.env.DATABASE_URL
     });
 
     try {

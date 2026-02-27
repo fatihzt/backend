@@ -7,8 +7,9 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL
 });
 
-export const initDb = async () => {
-    const client = await pool.connect();
+export const initDb = async (poolInstance?: Pool) => {
+    const dbPool = poolInstance || pool;
+    const client = await dbPool.connect();
     try {
         // Create Users Table (UUID-based)
         await client.query(`
@@ -97,9 +98,9 @@ export const initDb = async () => {
             ON CONFLICT (id) DO NOTHING;
         `);
 
-        console.log('✅ Database initialized and verified (UUID-based schema)');
+        // Database initialized successfully - no logging here since we'll log in server.ts
     } catch (err: any) {
-        console.error('❌ Database initialization error:', err.message);
+        // Throw error for handling upstream
         throw err;
     } finally {
         client.release();

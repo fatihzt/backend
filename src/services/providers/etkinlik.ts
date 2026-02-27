@@ -9,8 +9,6 @@ export class EtkinlikIoProvider implements IEventProvider {
     constructor() { }
 
     async fetchEvents(): Promise<ProviderEvent[]> {
-        console.log('📍 [ETKINLIK.IO] Scraping events from home page');
-
         try {
             const response = await axios.get('https://etkinlik.io/', {
                 headers: {
@@ -54,10 +52,8 @@ export class EtkinlikIoProvider implements IEventProvider {
                 }
             });
 
-            console.log(`✅ [ETKINLIK.IO] Scraped ${results.length} events`);
             return results;
         } catch (err: any) {
-            console.error('❌ [ETKINLIK.IO] Scraping failed:', err.message);
             return [];
         }
     }

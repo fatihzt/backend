@@ -10,8 +10,6 @@ export class TicketmasterProvider implements IEventProvider {
     }
 
     async fetchEvents(): Promise<ProviderEvent[]> {
-        console.log('🎫 [TICKETMASTER] Fetching ALL TR events');
-
         try {
             const response = await axios.get(
                 'https://app.ticketmaster.com/discovery/v2/events.json',
@@ -42,7 +40,6 @@ export class TicketmasterProvider implements IEventProvider {
             }));
 
         } catch (err: any) {
-            console.error('❌ [TICKETMASTER]', err.message);
             return [];
         }
     }

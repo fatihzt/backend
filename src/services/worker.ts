@@ -22,7 +22,7 @@ export class WorkerService {
 
             for (const existing of resultExisting.rows) {
                 if (await LLMService.isDuplicate(eventData, existing)) {
-                    console.log(`♻️ [WORKER] Duplicate detected: "${cleanTitle}" matches "${existing.title}"`);
+                    fastify.log.info(`Duplicate detected: "${cleanTitle}" matches "${existing.title}"`);
                     return { skipped: true };
                 }
             }
@@ -91,12 +91,12 @@ export class WorkerService {
                 title: `New Event in ${savedEvent.city}!`,
                 body: savedEvent.title,
                 data: { eventId: savedEvent.id }
-            });
+            }, fAny.pg);
 
             return { success: true, event: savedEvent };
 
         } catch (err) {
-            console.error('❌ [WORKER] Save failed:', err);
+            fastify.log.error(err, 'Worker save failed');
             return { error: err };
         }
     }
@@ -114,14 +114,14 @@ export class WorkerService {
     }
 
     static async processAll(fastify: FastifyInstance) {
-        console.log('🚀 [WORKER] Processing queue...');
+        fastify.log.info('Processing queue...');
         let processed = 0;
         while (true) {
             const success = await this.processNextJob(fastify);
             if (!success) break;
             processed++;
         }
-        console.log(`🏁 [WORKER] Done. Processed ${processed} jobs.`);
+        fastify.log.info(`Queue processing done. Processed ${processed} jobs.`);
         return processed;
     }
 }

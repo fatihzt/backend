@@ -26,7 +26,7 @@ export class GeoService {
             }
             return null;
         } catch (err) {
-            console.error('📍 [GEO] Failed to geocode:', location, err);
+            // Geocoding failed, return null
             return null;
         }
     }

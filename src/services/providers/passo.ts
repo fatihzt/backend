@@ -5,8 +5,6 @@ export class PassoProvider implements IEventProvider {
     name = 'Passo';
 
     async fetchEvents(): Promise<ProviderEvent[]> {
-        console.log('🎫 [PASSO] Fetching events for Istanbul and Ankara...');
-
         const cities = [
             { id: '101', name: 'Istanbul' },
             { id: '109', name: 'Ankara' }
@@ -26,7 +24,6 @@ export class PassoProvider implements IEventProvider {
                 });
 
                 const events = response.data?.items || [];
-                console.log(`🎫 [PASSO] Found ${events.length} events in ${city.name}.`);
 
                 events.forEach((event: any) => {
                     allEvents.push({
@@ -43,7 +40,7 @@ export class PassoProvider implements IEventProvider {
                 });
 
             } catch (err: any) {
-                console.error(`❌ [PASSO] Fetch failed for ${city.name}:`, err.message);
+                // Error fetching for this city, continue with others
             }
         }
 

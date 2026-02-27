@@ -62,3 +62,32 @@ export const loginSchema = {
         401: errorResponse
     }
 };
+
+export const updateProfileSchema = {
+    tags: ['Auth'],
+    summary: 'Update user profile',
+    security: [{ Bearer: [] }],
+    body: {
+        type: 'object',
+        required: ['full_name'],
+        properties: {
+            full_name: { type: 'string', minLength: 1, maxLength: 100 }
+        }
+    },
+    response: {
+        200: {
+            type: 'object',
+            properties: {
+                user: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        email: { type: 'string' },
+                        full_name: { type: 'string' }
+                    }
+                }
+            }
+        },
+        404: errorResponse
+    }
+};

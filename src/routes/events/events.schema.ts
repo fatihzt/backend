@@ -46,26 +46,37 @@ export const listEventsSchema = {
         properties: {
             city: { type: 'string' },
             category: { type: 'string' },
-            search: { type: 'string' }
+            search: { type: 'string' },
+            page: { type: 'integer', minimum: 1, default: 1 },
+            limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 }
         }
     },
     response: {
         200: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    id: { type: 'string' },
-                    title: { type: 'string' },
-                    description: { type: 'string' },
-                    location: { type: 'string' },
-                    city: { type: 'string' },
-                    category: { type: 'string' },
-                    image_url: { type: 'string' },
-                    start_time: { type: 'string' },
-                    source: { type: 'string' },
-                    creator_name: { type: 'string' }
-                }
+            type: 'object',
+            properties: {
+                data: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'string' },
+                            title: { type: 'string' },
+                            description: { type: 'string' },
+                            location: { type: 'string' },
+                            city: { type: 'string' },
+                            category: { type: 'string' },
+                            image_url: { type: 'string' },
+                            start_time: { type: 'string' },
+                            source: { type: 'string' },
+                            creator_name: { type: 'string' }
+                        }
+                    }
+                },
+                total: { type: 'integer' },
+                page: { type: 'integer' },
+                limit: { type: 'integer' },
+                totalPages: { type: 'integer' }
             }
         },
         500: errorResponse

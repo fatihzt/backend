@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { FastifyInstance } from 'fastify';
 import { LLMService } from './llm';
 import { ProviderEvent } from './providers/types';
 
@@ -13,9 +14,8 @@ export class ScraperService {
      * -----------------------------------------
      * allevents.in/{city}
      */
-    static async scrape(city: string): Promise<ProviderEvent[]> {
+    static async scrape(city: string, fastify?: FastifyInstance): Promise<ProviderEvent[]> {
         const citySlug = city.toLowerCase();
-        console.log(`🕷️ [SMART SCRAPER] Scraping city: ${citySlug}`);
 
         const events: ProviderEvent[] = [];
 
@@ -64,11 +64,15 @@ export class ScraperService {
                 });
             }
 
-            console.log(`🕷️ [SMART SCRAPER] ${events.length} events from ${citySlug}`);
+            if (fastify) {
+                fastify.log.info(`Scraper: ${events.length} events from ${citySlug}`);
+            }
             return events;
 
         } catch (err: any) {
-            console.error(`❌ [SCRAPER] Failed city ${citySlug}:`, err.message);
+            if (fastify) {
+                fastify.log.error(`Scraper failed for city ${citySlug}: ${err.message}`);
+            }
             return [];
         }
     }
@@ -79,8 +83,10 @@ export class ScraperService {
      * -----------------------------------------
      * allevents.in/turkey
      */
-    static async scrapeAll(): Promise<ProviderEvent[]> {
-        console.log('🕷️ [SMART SCRAPER] Discovering all TR cities');
+    static async scrapeAll(fastify?: FastifyInstance): Promise<ProviderEvent[]> {
+        if (fastify) {
+            fastify.log.info('Scraper: Discovering all TR cities');
+        }
 
         const allEvents: ProviderEvent[] = [];
         const visitedCities = new Set<string>();
@@ -108,7 +114,7 @@ export class ScraperService {
                 visitedCities.add(city);
 
                 try {
-                    const cityEvents = await this.scrape(city);
+                    const cityEvents = await this.scrape(city, fastify);
                     allEvents.push(...cityEvents);
                 } catch {
                     continue;
@@ -119,10 +125,14 @@ export class ScraperService {
             }
 
         } catch (err: any) {
-            console.error('❌ [SCRAPER] Failed to fetch TR cities:', err.message);
+            if (fastify) {
+                fastify.log.error(`Scraper failed to fetch TR cities: ${err.message}`);
+            }
         }
 
-        console.log(`🕷️ [SMART SCRAPER] TOTAL scraped events: ${allEvents.length}`);
+        if (fastify) {
+            fastify.log.info(`Scraper total events: ${allEvents.length}`);
+        }
         return allEvents;
     }
 

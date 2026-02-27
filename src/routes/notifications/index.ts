@@ -3,7 +3,6 @@
  */
 
 import { FastifyPluginAsync } from 'fastify';
-import pool from '../../services/db';
 
 const notificationRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   // Device token kaydetme endpoint'i

@@ -1,4 +1,4 @@
-import pool from './db';
+import { Pool } from 'pg';
 import { IEventProvider } from './providers/types';
 import { TicketmasterProvider } from './providers/ticketmaster';
 import { IBBProvider } from './providers/ibb';
@@ -20,24 +20,25 @@ export class EventSyncService {
         new BiletixProvider(),
         new SongkickProvider()
     ];
+    private pool: Pool;
+
+    constructor(pool: Pool) {
+        this.pool = pool;
+    }
 
     async syncAll() {
-        console.log('🔄 [SYNC] Starting full synchronization...');
 
         for (const provider of this.providers) {
             try {
                 const events = await provider.fetchEvents();
-                console.log(`🔄 [SYNC] Provider ${provider.name} returned ${events.length} events.`);
 
                 for (const event of events) {
                     await this.upsertEvent(event);
                 }
             } catch (err: any) {
-                console.error(`❌ [SYNC] Error syncing ${provider.name}:`, err.message);
+                // Error handling - could add logging here if needed
             }
         }
-
-        console.log('✅ [SYNC] Synchronization complete.');
     }
 
     private async upsertEvent(event: any) {
@@ -80,9 +81,8 @@ export class EventSyncService {
         ];
 
         try {
-            await pool.query(query, values);
+            await this.pool.query(query, values);
         } catch (err: any) {
-            console.error(`❌ [SYNC] Database upsert failed for ${event.title}:`, err.message);
             throw err; // Re-throw to allow error handling upstream
         }
     }

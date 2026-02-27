@@ -25,7 +25,7 @@ const adminRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> => 
         preHandler: [fastify.verifyApiKey]
     }, async (request, reply) => {
         // Run in background so we don't timeout the HTTP request
-        console.log('🚀 [ADMIN] Manual Trigger: Multi-Source Ingestion started...');
+        fastify.log.info('Manual Trigger: Multi-Source Ingestion started...');
         PipelineService.runIngestion(fastify).catch(err => {
             fastify.log.error(err, 'Background pipeline failed');
         });
@@ -37,13 +37,21 @@ const adminRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> => 
     });
 
     // Support legacy endpoints
-    fastify.post('/ingest', async (request, reply) => {
-        PipelineService.runIngestion(fastify);
+    fastify.post('/ingest', {
+        preHandler: [fastify.verifyApiKey]
+    }, async (request, reply) => {
+        PipelineService.runIngestion(fastify).catch(err => {
+            fastify.log.error(err, 'Background ingestion failed');
+        });
         return { message: 'Ingestion started' };
     });
 
-    fastify.post('/process-queue', async (request, reply) => {
-        WorkerService.processAll(fastify);
+    fastify.post('/process-queue', {
+        preHandler: [fastify.verifyApiKey]
+    }, async (request, reply) => {
+        WorkerService.processAll(fastify).catch(err => {
+            fastify.log.error(err, 'Background worker processing failed');
+        });
         return { message: 'Worker started' };
     });
 };

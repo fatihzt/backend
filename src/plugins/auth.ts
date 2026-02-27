@@ -4,8 +4,14 @@ import fastifyJwt from '@fastify/jwt';
 import { FastifyRequest, FastifyReply } from 'fastify';
 
 export default fp(async (fastify) => {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+        throw new Error('JWT_SECRET environment variable is required');
+    }
+
     fastify.register(fastifyJwt, {
-        secret: process.env.JWT_SECRET || 'supersecret'
+        secret: jwtSecret,
+        sign: { expiresIn: '7d' }
     });
 
     // Decorator for JWT Authentication
@@ -27,11 +33,6 @@ export default fp(async (fastify) => {
         // Get valid API keys from environment variables
         const validApiKeys = process.env.API_KEYS?.split(',') || [];
         
-        // Add default keys for development (remove in production!)
-        if (process.env.NODE_ENV !== 'production') {
-            validApiKeys.push('eventapp-mobile-secret-key-2026');
-        }
-
         if (!apiKey || !validApiKeys.includes(apiKey as string)) {
             return reply.code(403).send({ message: 'Forbidden: Invalid API Key' });
         }

@@ -9,7 +9,7 @@ import { WorkerService } from './worker';
 export class PipelineService {
 
     static async runIngestion(fastify: FastifyInstance) {
-        console.log('🌊 [PIPELINE] Starting FULL TR ingestion');
+        fastify.log.info('Starting FULL TR ingestion');
 
         const providers = [
             new TicketmasterProvider(process.env.TICKETMASTER_KEY!),
@@ -22,7 +22,7 @@ export class PipelineService {
 
         // --- API Providers
         for (const provider of providers) {
-            console.log(`🔌 [PIPELINE] Running ${provider.name}`);
+            fastify.log.info(`Running provider: ${provider.name}`);
             const events = await provider.fetchEvents();
 
             for (const event of events) {
@@ -30,18 +30,18 @@ export class PipelineService {
                 if (res.success) total++;
             }
 
-            console.log(`✅ ${provider.name}: ${events.length} events`);
+            fastify.log.info(`Provider ${provider.name} completed: ${events.length} events`);
         }
 
         // --- Scraper (ALL)
-        const scraped = await ScraperService.scrapeAll();
+        const scraped = await ScraperService.scrapeAll(fastify);
         for (const event of scraped) {
             const res = await WorkerService.saveEvent(fastify, event);
             if (res.success) total++;
         }
-        console.log(`🕷️ Scraper total: ${scraped.length}`);
+        fastify.log.info(`Scraper total: ${scraped.length}`);
 
-        console.log(`🌊 [PIPELINE] Completed. New events: ${total}`);
+        fastify.log.info(`Pipeline completed. New events: ${total}`);
         return total;
     }
 }

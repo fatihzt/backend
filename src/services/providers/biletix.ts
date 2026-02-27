@@ -5,8 +5,6 @@ export class BiletixProvider implements IEventProvider {
     name = 'Biletix';
 
     async fetchEvents(): Promise<ProviderEvent[]> {
-        console.log('🎫 [BILETIX] Fetching events from Solr endpoint...');
-
         try {
             // Get today and a date in the future for the query
             const now = new Date();
@@ -22,8 +20,6 @@ export class BiletixProvider implements IEventProvider {
 
             const response = await axios.get(url);
             const docs = response.data?.response?.docs ?? [];
-
-            console.log(`🎫 [BILETIX] Found ${docs.length} events.`);
 
             return docs.map((doc: any): ProviderEvent => {
                 // Determine category
@@ -47,7 +43,6 @@ export class BiletixProvider implements IEventProvider {
             });
 
         } catch (err: any) {
-            console.error('❌ [BILETIX] Fetch failed:', err.message);
             return [];
         }
     }

@@ -5,8 +5,6 @@ export class BubiletProvider implements IEventProvider {
     name = 'Bubilet';
 
     async fetchEvents(): Promise<ProviderEvent[]> {
-        console.log('🎫 [BUBILET] Fetching trending events...');
-
         try {
             // cityIds=34 is Istanbul
             const url = 'https://apiv3.bubilet.com.tr/event/trends?cityIds=34&count=100';
@@ -14,8 +12,6 @@ export class BubiletProvider implements IEventProvider {
 
             // Bubilet trends returns an array where the first element contains the events
             const data = response.data?.[0]?.events || [];
-
-            console.log(`🎫 [BUBILET] Found ${data.length} events.`);
 
             return data.map((event: any): ProviderEvent => {
                 // Determine category
@@ -39,7 +35,6 @@ export class BubiletProvider implements IEventProvider {
             });
 
         } catch (err: any) {
-            console.error('❌ [BUBILET] Fetch failed:', err.message);
             return [];
         }
     }

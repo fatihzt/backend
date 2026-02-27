@@ -5,14 +5,10 @@ export class IBBProvider implements IEventProvider {
     name = 'IBB';
 
     async fetchEvents(): Promise<ProviderEvent[]> {
-        console.log('🏛️ [IBB] Fetching events from kultur.istanbul REST API...');
-
         try {
             const url = 'https://kultur.istanbul/wp-json/wp/v2/event_listing?per_page=50&_embed';
             const response = await axios.get(url);
             const posts = response.data || [];
-
-            console.log(`🏛️ [IBB] Found ${posts.length} events.`);
 
             return posts.map((post: any): ProviderEvent => {
                 // Extract metadata (dates, location)
@@ -41,7 +37,6 @@ export class IBBProvider implements IEventProvider {
             });
 
         } catch (err: any) {
-            console.error('❌ [IBB] Fetch failed:', err.message);
             return [];
         }
     }

@@ -3,7 +3,7 @@
  */
 
 import axios from 'axios';
-import pool from './db';
+import { Pool } from 'pg';
 
 export interface NotificationPayload {
     userId?: string;
@@ -27,9 +27,8 @@ export class NotificationService {
     /**
      * Tek bir kullanıcıya push notification gönder
      */
-    static async sendPush(payload: NotificationPayload) {
+    static async sendPush(payload: NotificationPayload, pool: Pool) {
         if (!payload.userId) {
-            console.warn('⚠️ [NOTIFICATION] userId required for sendPush');
             return false;
         }
 
@@ -41,7 +40,6 @@ export class NotificationService {
             );
 
             if (result.rows.length === 0) {
-                console.log(`⚠️ [NOTIFICATION] No device tokens found for user ${payload.userId}`);
                 return false;
             }
 
@@ -65,10 +63,8 @@ export class NotificationService {
                 },
             });
 
-            console.log(`✅ [NOTIFICATION] Sent to ${tokens.length} device(s) for user ${payload.userId}`);
             return response.data;
         } catch (error: any) {
-            console.error('❌ [NOTIFICATION] Failed to send push:', error.message);
             return false;
         }
     }
@@ -76,7 +72,7 @@ export class NotificationService {
     /**
      * Şehir bazlı broadcast - O şehirdeki tüm kullanıcılara gönder
      */
-    static async broadcast(city: string, payload: Omit<NotificationPayload, 'userId'>) {
+    static async broadcast(city: string, payload: Omit<NotificationPayload, 'userId'>, pool: Pool) {
         try {
             // O şehirdeki kullanıcıların token'larını al
             // Not: Şimdilik tüm token'ları alıyoruz, ileride şehir bazlı filtreleme eklenebilir
@@ -88,7 +84,6 @@ export class NotificationService {
             );
 
             if (result.rows.length === 0) {
-                console.log(`⚠️ [NOTIFICATION] No device tokens found for broadcast to ${city}`);
                 return false;
             }
 
@@ -112,10 +107,8 @@ export class NotificationService {
                 },
             });
 
-            console.log(`✅ [NOTIFICATION] Broadcast sent to ${tokens.length} device(s) for city ${city}`);
             return response.data;
         } catch (error: any) {
-            console.error(`❌ [NOTIFICATION] Failed to broadcast to ${city}:`, error.message);
             return false;
         }
     }
@@ -146,10 +139,8 @@ export class NotificationService {
                 },
             });
 
-            console.log(`✅ [NOTIFICATION] Sent to ${tokens.length} device(s)`);
             return response.data;
         } catch (error: any) {
-            console.error('❌ [NOTIFICATION] Failed to send to tokens:', error.message);
             return false;
         }
     }

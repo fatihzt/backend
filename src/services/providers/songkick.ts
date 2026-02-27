@@ -6,8 +6,6 @@ export class SongkickProvider implements IEventProvider {
     name = 'Songkick';
 
     async fetchEvents(): Promise<ProviderEvent[]> {
-        console.log('🎸 [SONGKICK] Fetching events for Istanbul...');
-
         try {
             // Istanbul metro area URL
             const url = 'https://www.songkick.com/metro-areas/28844-turkey-istanbul';
@@ -51,11 +49,9 @@ export class SongkickProvider implements IEventProvider {
                 }
             });
 
-            console.log(`🎸 [SONGKICK] Found ${events.length} events.`);
             return events;
 
         } catch (err: any) {
-            console.error('❌ [SONGKICK] Fetch failed:', err.message);
             return [];
         }
     }

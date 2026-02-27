@@ -5,11 +5,9 @@ export class MobiletProvider implements IEventProvider {
     name = 'Mobilet';
 
     async fetchEvents(): Promise<ProviderEvent[]> {
-        console.log('📱 [MOBILET] Fetching events from MeiliSearch...');
-
         try {
             const url = 'https://search.mobilet.com/indexes/event/search';
-            const apiKey = 'a63d121547b0d950de3df57bba212d74a37a45973ee4cb07038f1ba8bc1bcd7d';
+            const apiKey = process.env.MOBILET_API_KEY || '';
 
             const response = await axios.post(url, {
                 q: '',
@@ -23,7 +21,6 @@ export class MobiletProvider implements IEventProvider {
             });
 
             const hits = response.data.hits || [];
-            console.log(`📱 [MOBILET] Found ${hits.length} events.`);
 
             return hits.map((hit: any): ProviderEvent => {
                 return {
@@ -41,7 +38,6 @@ export class MobiletProvider implements IEventProvider {
             });
 
         } catch (err: any) {
-            console.error('❌ [MOBILET] Fetch failed:', err.message);
             return [];
         }
     }

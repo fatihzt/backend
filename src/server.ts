@@ -1,5 +1,6 @@
 import fastify from 'fastify';
 import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
 import cron from 'node-cron';
 import dotenv from 'dotenv';
 import { initDb } from './services/db';
@@ -31,7 +32,14 @@ server.register(swaggerPlugin);
 
 // Middleware
 server.register(cors, {
-    origin: process.env.CORS_ORIGIN || '*', // Production'da spesifik origin kullanın
+    origin: process.env.NODE_ENV === 'production' ? false : true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+});
+
+// Rate limiting
+server.register(rateLimit, {
+    max: 100,
+    timeWindow: '1 minute'
 });
 
 // Routes
@@ -49,25 +57,30 @@ server.get('/health', async () => {
 
 const start = async () => {
     try {
-        // Initialize Database
-        await initDb();
+        // Wait for plugins to be ready
+        await server.ready();
 
-        // Start Sync Service
-        const syncService = new EventSyncService();
+        // Initialize Database with consolidated pool
+        await initDb(server.pg);
+
+        // Start Sync Service with consolidated pool
+        const syncService = new EventSyncService(server.pg);
 
         // Initial sync on startup (maybe not for dev, but let's do it once)
-        console.log('🚀 Starting initial sync...');
+        server.log.info('Starting initial sync...');
         // await syncService.syncAll(); // Commented for faster startup, can trigger via POST /api/sync
 
         // Setup Cron Job (Every hour)
         cron.schedule('0 * * * *', () => {
-            console.log('⏰ Running scheduled sync...');
-            syncService.syncAll();
+            server.log.info('Running scheduled sync...');
+            syncService.syncAll().catch(err => {
+                server.log.error(err, 'Scheduled sync failed');
+            });
         });
 
         const port = Number(process.env.PORT) || 3000;
         await server.listen({ port, host: '0.0.0.0' });
-        console.log(`📡 Server listening on http://localhost:${port}`);
+        server.log.info(`Server listening on http://localhost:${port}`);
 
     } catch (err) {
         server.log.error(err);
